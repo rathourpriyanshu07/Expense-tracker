@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Expense Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Animated Background -->
+<div class="bg-orbs">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<div class="grid-overlay"></div>
+
+<div class="app-wrapper">
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="logo">
+      <span class="logo-icon">⬡</span>
+      <span class="logo-text">Daily Expense Tracker</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn-icon" id="themeToggle" title="Toggle Theme">◐</button>
+      <button class="btn-icon" id="exportBtn" title="Export CSV">↓ Export</button>
+      <button class="btn-icon btn-reset" id="resetBtn" title="Reset Data">↺ Reset</button>
+    </div>
+  </header>
+
+  <!-- Balance Hero -->
+  <section class="balance-hero">
+    <div class="balance-label">Total Balance</div>
+    <div class="balance-amount" id="balance">₹0.00</div>
+    <div class="balance-trend" id="balanceTrend"></div>
+
+    <div class="stats-row">
+      <div class="stat-card income-card">
+        <div class="stat-icon">↑</div>
+        <div class="stat-info">
+          <div class="stat-label">Income</div>
+          <div class="stat-value" id="income">₹0.00</div>
+        </div>
+        <div class="stat-bar">
+          <div class="stat-bar-fill income-fill" id="incomeBar"></div>
+        </div>
+      </div>
+      <div class="stat-card expense-card">
+        <div class="stat-icon">↓</div>
+        <div class="stat-info">
+          <div class="stat-label">Expenses</div>
+          <div class="stat-value" id="expense">₹0.00</div>
+        </div>
+        <div class="stat-bar">
+          <div class="stat-bar-fill expense-fill" id="expenseBar"></div>
+        </div>
+      </div>
+      <div class="stat-card savings-card">
+        <div class="stat-icon">◈</div>
+        <div class="stat-info">
+          <div class="stat-label">Savings Rate</div>
+          <div class="stat-value" id="savingsRate">0%</div>
+        </div>
+        <div class="stat-bar">
+          <div class="stat-bar-fill savings-fill" id="savingsBar"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Grid -->
+  <div class="main-grid">
+
+    <!-- Add Transaction Panel -->
+    <div class="panel add-panel">
+      <div class="panel-header">
+        <h3 class="panel-title">Add Transaction</h3>
+        <div class="type-toggle">
+          <button class="type-btn active" id="incomeBtn" onclick="setType('income')">Income</button>
+          <button class="type-btn" id="expenseBtn" onclick="setType('expense')">Expense</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <input type="text" id="text" class="form-input" placeholder="e.g. Freelance payment…" autocomplete="off">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Amount (₹)</label>
+        <input type="number" id="amount" class="form-input" placeholder="0.00" min="0" step="0.01">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select id="category" class="form-input form-select">
+            <option value="General">🌐 General</option>
+            <option value="Food">🍜 Food</option>
+            <option value="Transport">🚌 Transport</option>
+            <option value="Shopping">🛍 Shopping</option>
+            <option value="Health">💊 Health</option>
+            <option value="Entertainment">🎬 Entertainment</option>
+            <option value="Salary">💼 Salary</option>
+            <option value="Investment">📈 Investment</option>
+            <option value="Rent">🏠 Rent</option>
+            <option value="Utilities">⚡ Utilities</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input type="date" id="date" class="form-input">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Note (optional)</label>
+        <input type="text" id="note" class="form-input" placeholder="Any extra note…">
+      </div>
+
+      <button class="add-btn" id="addBtn" onclick="addTransaction()">
+        <span class="add-btn-icon">+</span>
+        <span id="addBtnText">Add Income</span>
+      </button>
+    </div>
+
+    <!-- Right Column -->
+    <div class="right-column">
+
+      <!-- Chart Panel -->
+      <div class="panel chart-panel">
+        <div class="panel-header">
+          <h3 class="panel-title">Spending Overview</h3>
+          <select class="mini-select" id="chartFilter" onchange="updateChart()">
+            <option value="all">All Time</option>
+            <option value="month">This Month</option>
+            <option value="week">This Week</option>
+          </select>
+        </div>
+        <div class="chart-container">
+          <canvas id="donutChart" width="160" height="160"></canvas>
+          <div class="chart-center" id="chartCenter">
+            <div class="chart-center-val" id="chartCenterVal">₹0</div>
+            <div class="chart-center-label">total</div>
+          </div>
+        </div>
+        <div class="chart-legend" id="chartLegend"></div>
+      </div>
+
+      <!-- Monthly Bar -->
+      <div class="panel bar-panel">
+        <div class="panel-header">
+          <h3 class="panel-title">Monthly Flow</h3>
+        </div>
+        <div class="bar-chart" id="barChart"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Filter + Search -->
+  <div class="panel history-panel">
+    <div class="panel-header history-header">
+      <h3 class="panel-title">Transaction History</h3>
+      <div class="history-controls">
+        <input type="text" id="searchInput" class="mini-input" placeholder="🔍 Search…" oninput="renderHistory()">
+        <select class="mini-select" id="filterType" onchange="renderHistory()">
+          <option value="all">All</option>
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+        <select class="mini-select" id="filterCategory" onchange="renderHistory()">
+          <option value="all">All Categories</option>
+        </select>
+        <select class="mini-select" id="sortBy" onchange="renderHistory()">
+          <option value="date-desc">Newest</option>
+          <option value="date-asc">Oldest</option>
+          <option value="amount-desc">Highest</option>
+          <option value="amount-asc">Lowest</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="historyList" class="history-list"></div>
+
+    <div class="pagination" id="pagination"></div>
+  </div>
+
+  <!-- Budget Tracker -->
+  <div class="panel budget-panel">
+    <div class="panel-header">
+      <h3 class="panel-title">Monthly Budget</h3>
+      <button class="btn-ghost" onclick="toggleBudgetForm()">+ Set Budget</button>
+    </div>
+    <div class="budget-form hidden" id="budgetForm">
+      <select class="form-input form-select" id="budgetCategory">
+        <option value="Food">🍜 Food</option>
+        <option value="Transport">🚌 Transport</option>
+        <option value="Shopping">🛍 Shopping</option>
+        <option value="Health">💊 Health</option>
+        <option value="Entertainment">🎬 Entertainment</option>
+        <option value="Rent">🏠 Rent</option>
+        <option value="Utilities">⚡ Utilities</option>
+      </select>
+      <input type="number" id="budgetAmount" class="form-input" placeholder="Budget ₹">
+      <button class="add-btn small" onclick="setBudget()">Set</button>
+    </div>
+    <div class="budget-bars" id="budgetBars"></div>
+  </div>
+
+  <footer class="app-footer">
+    <span>Daily Expense Tracker &copy; 2026</span>
+    <span id="txCount">0 transactions</span>
+  </footer>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Reset Modal -->
+<div class="modal-overlay hidden" id="resetModal">
+  <div class="modal-box">
+    <div class="modal-icon">↺</div>
+    <h3 class="modal-title">Reset Tracker</h3>
+    <p class="modal-desc">Choose what you'd like to clear. This action cannot be undone.</p>
+
+    <div class="reset-options">
+      <button class="reset-option-btn" onclick="doReset('month')">
+        <span class="reset-opt-icon">📅</span>
+        <div class="reset-opt-info">
+          <div class="reset-opt-title">This Month Only</div>
+          <div class="reset-opt-sub">Remove transactions from <span id="currentMonthLabel"></span></div>
+        </div>
+      </button>
+      <button class="reset-option-btn" onclick="doReset('all')">
+        <span class="reset-opt-icon">🗑️</span>
+        <div class="reset-opt-info">
+          <div class="reset-opt-title">All Transactions</div>
+          <div class="reset-opt-sub">Full reset — start fresh for a new person</div>
+        </div>
+      </button>
+      <button class="reset-option-btn" onclick="doReset('budgets')">
+        <span class="reset-opt-icon">💸</span>
+        <div class="reset-opt-info">
+          <div class="reset-opt-title">Budgets Only</div>
+          <div class="reset-opt-sub">Clear all monthly budget limits you've set</div>
+        </div>
+      </button>
+      <button class="reset-option-btn danger" onclick="doReset('everything')">
+        <span class="reset-opt-icon">⚠️</span>
+        <div class="reset-opt-info">
+          <div class="reset-opt-title">Wipe Everything</div>
+          <div class="reset-opt-sub">Transactions + budgets + theme settings</div>
+        </div>
+      </button>
+    </div>
+
+    <button class="modal-cancel" onclick="closeResetModal()">Cancel</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
